@@ -1,0 +1,47 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html">
+
+<polymer-element name="ancient-society" attributes="name image link members" noscript>
+  <template>
+    <style>
+
+      paper-shadow {
+        display: block;
+        position: relative;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        padding: 5px 10px;
+      }
+
+      paper-shadow::shadow #shadow-bottom,
+      paper-shadow::shadow #shadow-top {
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .society {
+        width: 100px;
+        height: 100px;
+      }
+
+      .member {
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+      }
+
+      #members { padding: 5px 20px; }
+    </style>
+    <paper-shadow z="1" layout horizontal top>
+      <div layout vertical center>
+        <a href="{{link}}" target="_blank"><img src="{{image}}" class="society"></a>
+        <b>{{ name }}</b>
+      </div>
+      <div flex id="members">
+        <template repeat="{{ member in members }}">
+          <a href="{{member.link}}" target="_blank"><img src="{{member.image}}" class="member" alt="{{member.name}}" title="{{member.name}}"></a>
+        </template>
+      </div>
+    </paper-shadow>
+  </template>
+</polymer-element>

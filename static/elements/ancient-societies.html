@@ -1,0 +1,359 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
+<link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../bower_components/core-tooltip/core-tooltip.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/core-icons/core-icons.html">
+<link rel="import" href="../bower_components/core-icons/social-icons.html">
+<link rel="import" href="../bower_components/google-apis/google-plusone-api.html">
+<link rel="import" href="../bower_components/google-apis/google-client-api.html">
+<link rel="import" href="../bower_components/google-signin/google-signin.html">
+<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="ancient-society.html">
+
+<polymer-element name="ancient-societies" attributes="appId clientId">
+  <template>
+    <style>
+      core-header-panel {
+        height: 100%;
+      }
+
+      main {
+        padding: 10px;
+        margin-bottom: 50px;
+      }
+
+      @media all and (min-width: 600px) {
+        main {
+          padding: 20px;
+        }
+      }
+
+      .choice {
+        padding: 5px 10px;
+        background-color: #EEE;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+
+      #links {
+        border-radius: 5px;
+        background-color: #125;
+        color: white;
+        margin-bottom: 20px;
+      }
+      #links a {
+        color: white;
+        text-decoration: none;
+      }
+
+      #links a:hover {
+        text-decoration: underline;
+      }
+
+      .choice > div, #links > span {
+        margin: 10px;
+      }
+
+      img.profile {
+        margin-right: 10px;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        min-height: 50px;
+      }
+
+      paper-icon-button {
+        border: 2px solid rgba(0,0,0,0);
+      }
+
+      paper-icon-button[selected] {
+        border: 2px solid #888;
+        border-radius: 50%;
+        background-color: #EFE;
+      }
+
+      paper-icon-button::shadow core-icon {
+        width: 50px;
+        height: 50px;
+      }
+
+      paper-shadow::shadow #shadow-bottom,
+      paper-shadow::shadow #shadow-top {
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      #share {
+        border-radius: 5px;
+        font-weight: bold;
+        box-shadow: 0 2px 10px 0 #000;
+        margin: 5px;
+        background-color: white;
+      }
+
+      #share:hover {
+        background-color: rgba(0,0,0,0.05);
+      }
+
+      .small {
+        font-size: 0.8em;
+      }
+    </style>
+
+    <google-api-loader name="plus" version="v1"></google-api-loader>
+    <google-api-loader
+      name="ancientsocieties" version="v1"
+      appId="{{appId}}"
+      on-google-api-load="{{fetchData}}"></google-api-loader>
+
+    <core-header-panel>
+      <core-toolbar>
+        <div flex>Ancient Societies</div>
+        <google-signin
+          clientId="{{clientId}}"
+          scopes="profile email"
+          on-google-signin-success="{{signIn}}"
+          on-google-signed-out="{{signOut}}"
+        ></google-signin>
+      </core-toolbar>
+      <main>
+        <paper-shadow z="1" id="links" layout horizontal center>
+          <span flex></span>
+          <span>What is this site all about:</span>
+          <span><a href="http://www.ancientsocieties.com/" target="_blank">Ancient Societies Blog</a></span>
+          <span><a href="http://www.ancientsocieties.com/pages/the-12-ancient-lines/" target="_blank">The 12 Ancient Lines</a></span>
+          <span><a href="http://www.ancientsocieties.com/roll-call" target="_blank">ROLL CALL</a></span>
+          <span flex></span>
+        </paper-shadow>
+        <template if="{{!signedIn && invited}}">
+          <paper-shadow class="choice" layout horizontal center>
+            <img src="{{invited.image}}" class="profile">
+            <p>
+              You've been invited to join the {{invited.name}}.<br>
+              Sign-in above to follow this or another path.
+            </p>
+          </paper-shadow>
+        </template>
+        <template if="{{signedIn && profile}}">
+          <paper-shadow class="choice" layout vertical center>
+            <div layout horizontal center>
+              <img src="{{profile.image}}" class="profile">
+              <template if="{{!invited}}">
+                <span><b>{{profile.name}}</b>, please choose your destiny:</span>
+              </template>
+              <template if="{{invited}}">
+                <span><b>{{profile.name}}</b>, you've been invited to join the {{invited.name}}. Please choose your destiny:</span>
+              </template>
+            </div>
+            <div>
+              <template repeat="{{ s in societies }}">
+                <core-tooltip label="{{s.name}}">
+                  <paper-icon-button src="{{s.image}}" selected?="{{profile.line == s.id}}" invited?="{{s.id == invited.id}}" on-click="{{select}}"></paper-icon-button>
+                </core-tooltip>
+              </template>
+              <core-tooltip label="Delete choice">
+                <paper-icon-button icon="clear" on-click="{{deselect}}"></paper-icon-button>
+              </core-tooltip>
+            </div>
+            <template if="{{chosen}}">
+              You've decided to follow the path of the {{chosen.name}}.
+            </template>
+          </paper-shadow>
+        </template>
+        <template repeat="{{ s in societies }}">
+          <ancient-society name="{{s.name}}" image="{{s.image}}" link="{{s.link}}" members="{{s.members}}"></ancient-society>
+        </template>
+        <br><br><hr>
+        <p class="small">
+          Developed by <a href="https://google.com/+GerwinSturm" target="_blank">Gerwin Sturm</a>, <a href="https://www.foldedsoft.at/" target="_blank">FoldedSoft e.U.</a><br><br>
+          Privacy: The email address requested during the sign-in flow is only necessary for authentication and won't be stored or used for any other purposes.<br><br>
+          <a href="/cookie_policy.html" target="_blank">Cookie policy</a><br><br>
+        </p>
+      </main>
+    </core-header-panel>
+    <paper-toast id="successToast" text="Alignment changed successfully."></paper-toast>
+    <paper-toast id="failureToast" text="Error while changing alignment, please try again."></paper-toast>
+  </template>
+  <script>
+    (function (global) {
+
+      function apisReady() {
+        if (!global.gapi.client.plus) { return false; }
+        if (!global.gapi.client.plus.people) { return false; }
+        if (!global.gapi.client.ancientsocieties) { return false; }
+        if (!global.gapi.client.ancientsocieties.student) { return false; }
+        return true;
+      }
+
+      Polymer('ancient-societies', {
+        signedIn: false,
+        profile: null,
+        invited: null,
+        chosen: null,
+
+        /**
+         * Called after a successful authentication.
+         * Retrieves profile information for the authenticated user
+         */
+        signIn: function () {
+          if (!apisReady()) {
+            // Wait for APIs to load in case immediate sign-in is quicker
+            global.setTimeout(this.signIn.bind(this), 100);
+            return;
+          }
+
+          global.gapi.client.plus.people.get({
+            userId: 'me',
+            fields: 'id,displayName,url,image'
+          }).then(function (res) {
+            var profile = res.result;
+            this.signedIn = true;
+            this.profile = {
+              id: profile.id,
+              name: profile.displayName,
+              link: profile.url,
+              image: profile.image.url,
+              line: null
+            };
+
+            global.gapi.client.ancientsocieties.student.get({
+              id: this.profile.id
+            }).then(function (res) {
+              if (!!res.result.line) {
+                this.profile.line = res.result.line;
+                this.chosen = this.societies[this.societyById[res.result.line]];
+                //global.setTimeout(this.renderButton.bind(this), 100);
+              }
+            }.bind(this), function (err) {
+              global.console.log("Error retrieving data", err.result);
+              this.profile.line = null;
+              this.chosen = null;
+            }.bind(this));
+          }.bind(this), function (err) {
+            global.console.log("Authentication error", err.result);
+            this.signedIn = false;
+            this.profile = null;
+            this.chosen = null;
+          }.bind(this));
+        },
+        signOut: function () {
+          this.signedIn = false;
+          this.profile = null;
+          this.chosen = null;
+        },
+        fetchData: function () {
+          this.fetchStudents();
+        },
+        removeStudent: function () {
+          this.societies.forEach(function (s) {
+            for (var i = 0; i < s.members.length; i++) {
+              if (s.members[i].id === this.profile.id) {
+                s.members.splice(i, 1);
+                break;
+              }
+            }
+          }.bind(this));
+        },
+        deselect: function () {
+          global.gapi.client.ancientsocieties.student.delete({id: this.profile.id}).execute(function (r) {
+            if (r.id) {
+              this.removeStudent();
+              this.profile.line = null;
+              this.chosen = null;
+              this.$.successToast.show();
+            } else {
+              this.$.failureToast.show();
+            }
+          }.bind(this));
+        },
+        select: function (e, detail, sender) {
+          var
+            line = sender.templateInstance.model.s.id;
+            new_profile = {
+              id: this.profile.id,
+              name: this.profile.name,
+              link: this.profile.link,
+              image: this.profile.image,
+              line: line
+            };
+
+          global.gapi.client.ancientsocieties.student.insert(new_profile).execute(function (r) {
+            if (r.line) {
+              this.removeStudent();
+              this.profile.line = r.line;
+              this.chosen = this.societies[this.societyById[line]];
+              this.chosen.members.push(this.profile);
+              //global.setTimeout(this.renderButton.bind(this), 100);
+              this.$.successToast.show();
+            } else {
+              this.$.failureToast.show();
+            }
+          }.bind(this));
+        },
+        fetchStudents: function (pageToken) {
+          global.gapi.client.ancientsocieties.student.list({limit: 100, pageToken: pageToken}).execute(function (result) {
+            if (!!result.items) {
+              result.items.forEach(function (m) {
+                this.societies[this.societyById[m.line]].members.push(m);
+              }.bind(this));
+            }
+            if (!!result.nextPageToken) {
+              global.setTimeout(this.fetchStudents.bind(this, result.nextPageToken), 1);
+            }
+          }.bind(this));
+        },
+        renderButton: function () {
+          global.gapi.interactivepost.render(this.shadowRoot.getElementById('share'), {
+            clientid: '446132887758-euehm1f4g06mvsmea5jd1nsaolvhv9ee.apps.googleusercontent.com',
+            cookiepolicy: 'single_host_origin',
+            scope: 'profile email https://www.googleapis.com/auth/plus.login',
+            contenturl: 'https://scary-experiments.appspot.com/ancient-societies/link/' + this.chosen.id.toLowerCase(),
+            calltoactionlabel: 'JOIN_ME',
+            calltoactionurl: 'https://scary-experiments.appspot.com/ancient-societies/join/' + this.chosen.id.toLowerCase(),
+            prefilltext: 'I have decided to follow the path of the ' + this.chosen.name + '. Follow me to find the Truth! #AncSoc'
+          });
+        },
+        societyById: {
+          'AKSUMITE': 0,
+          'CAHOKIAN': 1,
+          'DONGHU': 2,
+          'HARAPPAN': 3,
+          'KOORI': 4,
+          'LATENE': 5,
+          'MINOAN': 6,
+          'MU': 7,
+          'NABATEAN': 8,
+          'OLMEC': 9,
+          'SHANG': 10,
+          'SUMERIAN': 11
+        },
+        societies: [
+          {name: 'Aksumite', image: 'images/aksumite.png', id: 'AKSUMITE', members: [], link: 'http://www.ancientsocieties.com/category/aksumite/'},
+          {name: 'Cahokian', image: 'images/cahokian.png', id: 'CAHOKIAN', members: [], link: 'http://www.ancientsocieties.com/category/cahokian/'},
+          {name: 'Donghu', image: 'images/donghu.png', id: 'DONGHU', members: [], link: 'http://www.ancientsocieties.com/category/donghu/'},
+          {name: 'Harappan', image: 'images/harappan.png', id: 'HARAPPAN', members: [], link: 'http://www.ancientsocieties.com/category/harappan/'},
+          {name: 'Koori', image: 'images/koori.png', id: 'KOORI', members: [], link: 'http://www.ancientsocieties.com/category/koori/'},
+          {name: 'La Tène', image: 'images/latene.png', id: 'LATENE', members: [], link: 'http://www.ancientsocieties.com/category/la-tene/'},
+          {name: 'Minoan', image: 'images/minoan.png', id: 'MINOAN', members: [], link: 'http://www.ancientsocieties.com/category/minoan/'},
+          {name: 'Mu', image: 'images/mu.png', id: 'MU', members: [], link: 'http://www.ancientsocieties.com/category/mu/'},
+          {name: 'Nabatean', image: 'images/nabatean.png', id: 'NABATEAN', members: [], link: 'http://www.ancientsocieties.com/category/nabatean/'},
+          {name: 'Olmec', image: 'images/olmec.png', id: 'OLMEC', members: [], link: 'http://www.ancientsocieties.com/category/olmec/'},
+          {name: 'Shang', image: 'images/shang.png', id: 'SHANG', members: [], link: 'http://www.ancientsocieties.com/category/shang/'},
+          {name: 'Sumerian', image: 'images/sumerian.png', id: 'SUMERIAN', members: [], link: 'http://www.ancientsocieties.com/category/sumerian/'}
+        ],
+        ready: function () {
+          var invited;
+          if (!!global.location.hash) {
+            invited = this.societyById[global.location.hash.substring(1).toUpperCase()];
+            if (invited !== undefined) {
+              this.invited = this.societies[invited];
+            }
+          }
+        }
+      });
+    }(this));
+  </script>
+</polymer-element>

@@ -1,0 +1,39 @@
+{
+  "name": "ancient-societies",
+  "version": "0.0.1",
+  "authors": [
+    "Scarygami <scarygami@gmail.com>"
+  ],
+  "license": "Apache 2.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#master",
+    "google-apis": "GoogleWebComponents/google-apis#master",
+    "google-signin": "GoogleWebComponents/google-signin#master",
+    "paper-icon-button": "Polymer/paper-icon-button#master",
+    "paper-toast": "Polymer/paper-toast#master",
+    "core-header-panel": "Polymer/core-header-panel#master",
+    "core-toolbar": "Polymer/core-toolbar#master",
+    "core-tooltip": "Polymer/core-tooltip#master",
+    "core-icons": "Polymer/core-icons#master"
+  },
+  "resolutions": {
+    "polymer": "master",
+    "platform": "master",
+    "core-component-page": "master",
+    "core-icons": "master",
+    "google-apis": "master",
+    "font-roboto": "master",
+    "paper-ripple": "master",
+    "core-icon": "master",
+    "core-iconset-svg": "master",
+    "core-iconset": "master",
+    "core-meta": "master"
+  }
+}
